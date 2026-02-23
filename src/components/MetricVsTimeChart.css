@@ -1,0 +1,80 @@
+.metric-vs-time-wrap {
+  cursor: pointer;
+  margin: 0.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.metric-vs-time-chart {
+  padding: 0.5rem;
+}
+
+.metric-vs-time-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.metric-vs-time-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.metric-vs-time-title {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.metric-vs-time-caption {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.metric-vs-time-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.metric-vs-time-download-btn,
+.metric-vs-time-enlarge-btn,
+.metric-vs-time-close-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.metric-vs-time-download-btn:hover,
+.metric-vs-time-enlarge-btn:hover,
+.metric-vs-time-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.metric-vs-time-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.metric-vs-time-lightbox-inner {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 1rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: auto;
+}

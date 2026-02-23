@@ -228,6 +228,35 @@
   overflow: hidden;
 }
 
+.chat-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  flex-shrink: 0;
+}
+
+.chat-tab {
+  padding: 0.75rem 1rem;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.chat-tab:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chat-tab.active {
+  color: rgba(255, 255, 255, 0.95);
+  border-bottom-color: #ffd700;
+}
+
 .chat-header {
   padding: 0.9rem 1.5rem;
   background: rgba(255, 255, 255, 0.04);
@@ -247,6 +276,15 @@
   overflow: hidden;
   text-overflow: ellipsis;
   letter-spacing: -0.01em;
+}
+
+/* Drop zone wrapper (header + messages + overlay) */
+.chat-drop-zone {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
 }
 
 /* Messages */
@@ -277,7 +315,7 @@
 .chat-drop-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(99, 102, 241, 0.15);
+  background: rgba(99, 102, 241, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -285,8 +323,8 @@
   font-size: 1.4rem;
   font-weight: 600;
   color: #fff;
-  pointer-events: none;
-  z-index: 10;
+  pointer-events: auto;
+  z-index: 9999;
 }
 
 /* Message bubbles */
@@ -938,6 +976,10 @@
 .tool-call-result {
   color: rgba(52, 211, 153, 0.75);
   word-break: break-all;
+}
+
+.tool-call-result.tool-call-error {
+  color: rgba(248, 113, 113, 0.9);
 }
 
 /* ── Engagement chart ────────────────────────────────────────────────── */

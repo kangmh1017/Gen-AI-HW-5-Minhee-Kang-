@@ -1,5 +1,12 @@
 const API = process.env.REACT_APP_API_URL || '';
 
+/** GET /api/status — { connected: boolean, usersCount?, sessionsCount? } */
+export const getDbStatus = async () => {
+  const res = await fetch(`${API}/api/status`);
+  const data = await res.json().catch(() => ({}));
+  return data;
+};
+
 const api = async (path, options = {}) => {
   const res = await fetch(`${API}${path}`, {
     headers: { 'Content-Type': 'application/json', ...options.headers },
@@ -12,10 +19,10 @@ const api = async (path, options = {}) => {
 
 // ── Users ────────────────────────────────────────────────────────────────────
 
-export const createUser = async (username, password, email = '') => {
+export const createUser = async (username, password, email = '', firstName = '', lastName = '') => {
   await api('/api/users', {
     method: 'POST',
-    body: JSON.stringify({ username, password, email }),
+    body: JSON.stringify({ username, password, email, firstName, lastName }),
   });
 };
 
@@ -24,7 +31,13 @@ export const findUser = async (username, password) => {
     method: 'POST',
     body: JSON.stringify({ username, password }),
   });
-  return data.ok ? { username: data.username } : null;
+  return data.ok
+    ? {
+        username: data.username,
+        firstName: data.firstName || '',
+        lastName: data.lastName || '',
+      }
+    : null;
 };
 
 // ── Sessions ─────────────────────────────────────────────────────────────────
@@ -37,6 +50,15 @@ export const createSession = async (username, agent = null, title = null) => {
   return api('/api/sessions', {
     method: 'POST',
     body: JSON.stringify({ username, agent, title }),
+  });
+};
+
+/** Start chat: create session + first assistant message in DB. Returns { session, message }. */
+export const startSession = async (username, options = {}) => {
+  const { title, firstName, lastName, agent } = options;
+  return api('/api/sessions/start', {
+    method: 'POST',
+    body: JSON.stringify({ username, title, firstName, lastName, agent }),
   });
 };
 
@@ -62,4 +84,13 @@ export const saveMessage = async (sessionId, role, content, imageData = null, ch
 
 export const loadMessages = async (sessionId) => {
   return api(`/api/messages?session_id=${encodeURIComponent(sessionId)}`);
+};
+
+// ── YouTube channel data (Homework 5) ────────────────────────────────────────
+
+export const fetchYouTubeChannelData = async (channelUrl, maxVideos) => {
+  return api('/api/youtube/channel', {
+    method: 'POST',
+    body: JSON.stringify({ channelUrl, maxVideos }),
+  });
 };

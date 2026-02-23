@@ -90,6 +90,17 @@
   cursor: not-allowed;
 }
 
+.auth-db-warning {
+  color: #fcd34d;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  margin: 0 0 1rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(252, 211, 77, 0.1);
+  border: 1px solid rgba(252, 211, 77, 0.25);
+  border-radius: 8px;
+}
+
 .auth-error {
   color: #fca5a5;
   font-family: 'Inter', sans-serif;

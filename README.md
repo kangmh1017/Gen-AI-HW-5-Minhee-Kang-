@@ -18,8 +18,19 @@ Create a `.env` file in the project root with:
 | `REACT_APP_GEMINI_API_KEY` | Yes | Frontend (baked in at build) | Google Gemini API key. Get one at [Google AI Studio](https://aistudio.google.com/apikey). |
 | `REACT_APP_MONGODB_URI` | Yes | Backend | MongoDB Atlas connection string. Format: `mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/` |
 | `REACT_APP_API_URL` | Production only | Frontend (baked in at build) | Full URL of the backend, e.g. `https://your-backend.onrender.com`. Leave blank for local dev (proxy handles it). |
+| `YOUTUBE_API_KEY` or `REACT_APP_YOUTUBE_API_KEY` | For YouTube tab | Backend | [YouTube Data API v3](https://console.cloud.google.com/apis/credentials) key for the **YouTube Channel Download** tab and channel data. |
 
 The backend also accepts `MONGODB_URI` or `REACT_APP_MONGO_URI` as the MongoDB connection string if you prefer those names.
+
+### Veritasium channel sample (Homework 5)
+
+To download 10 videos from https://www.youtube.com/@veritasium and save to `public/veritasium-channel.json`:
+
+```bash
+YOUTUBE_API_KEY=your_key node scripts/download-veritasium.js
+```
+
+A minimal sample JSON is already in `public/veritasium-channel.json`; replace it with the script output for full data.
 
 ### Example `.env` (local development)
 
@@ -49,6 +60,8 @@ One document per registered user.
 | `username` | string | Lowercase username |
 | `password` | string | bcrypt hash |
 | `email` | string | Email address (optional) |
+| `firstName` | string | First name (optional, for chat personalization) |
+| `lastName` | string | Last name (optional, for chat personalization) |
 | `createdAt` | string | ISO timestamp |
 
 #### Collection: `sessions`

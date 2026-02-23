@@ -4,11 +4,21 @@ import Chat from './components/Chat';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(() => localStorage.getItem('chatapp_user'));
+  const [user, setUser] = useState(() => {
+    try {
+      const raw = localStorage.getItem('chatapp_user');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return typeof parsed === 'string' ? { username: parsed, firstName: '', lastName: '' } : parsed;
+    } catch {
+      return null;
+    }
+  });
 
-  const handleLogin = (username) => {
-    localStorage.setItem('chatapp_user', username);
-    setUser(username);
+  const handleLogin = (userData) => {
+    const u = typeof userData === 'string' ? { username: userData, firstName: '', lastName: '' } : userData;
+    localStorage.setItem('chatapp_user', JSON.stringify(u));
+    setUser(u);
   };
 
   const handleLogout = () => {
@@ -17,7 +27,7 @@ function App() {
   };
 
   if (user) {
-    return <Chat username={user} onLogout={handleLogout} />;
+    return <Chat user={user} onLogout={handleLogout} />;
   }
   return <Auth onLogin={handleLogin} />;
 }

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { createUser, findUser } from '../services/mongoApi';
+import { useState, useEffect } from 'react';
+import { createUser, findUser, getDbStatus } from '../services/mongoApi';
 import './Auth.css';
 
 export default function Auth({ onLogin }) {
@@ -7,8 +7,15 @@ export default function Auth({ onLogin }) {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dbConnected, setDbConnected] = useState(null);
+
+  useEffect(() => {
+    getDbStatus().then((s) => setDbConnected(s.connected === true)).catch(() => setDbConnected(false));
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,15 +24,17 @@ export default function Auth({ onLogin }) {
     try {
       const name = username.trim().toLowerCase();
       if (mode === 'create') {
-        await createUser(name, password, email.trim());
+        await createUser(name, password, email.trim(), firstName.trim(), lastName.trim());
         setError('');
         setMode('login');
         setPassword('');
         setEmail('');
+        setFirstName('');
+        setLastName('');
       } else {
         const user = await findUser(name, password);
         if (!user) throw new Error('User not found or invalid password');
-        onLogin(user.username);
+        onLogin(user);
       }
     } catch (err) {
       try {
@@ -46,7 +55,32 @@ export default function Auth({ onLogin }) {
           <h1>Chat</h1>
           <p className="auth-subtitle">Yale · Modern</p>
         </div>
+        {dbConnected === false && (
+          <p className="auth-db-warning">
+            Database not configured. Add REACT_APP_MONGODB_URI to .env and restart the server, then refresh this page.
+          </p>
+        )}
         <form onSubmit={handleSubmit} className="auth-form">
+          {mode === 'create' && (
+            <>
+              <input
+                type="text"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                autoComplete="given-name"
+              />
+              <input
+                type="text"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+                autoComplete="family-name"
+              />
+            </>
+          )}
           <input
             type="text"
             placeholder="Username"
@@ -73,12 +107,12 @@ export default function Auth({ onLogin }) {
             required
             autoComplete={mode === 'create' ? 'new-password' : 'current-password'}
           />
-          {error && (
-        <p className="auth-error">
-          {error}
-          {error.includes('already exists') && ' Try logging in instead.'}
-        </p>
-      )}
+          {error && !(dbConnected === false && error.includes('Database not configured')) && (
+            <p className="auth-error">
+              {error}
+              {error.includes('already exists') && ' Try logging in instead.'}
+            </p>
+          )}
           <button type="submit" disabled={loading}>
             {loading ? '...' : mode === 'login' ? 'Log in' : 'Create account'}
           </button>
