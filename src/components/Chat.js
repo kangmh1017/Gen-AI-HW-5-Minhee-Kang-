@@ -223,9 +223,21 @@ export default function Chat({ user, onLogout }) {
   // Persist channel JSON per session so it survives refresh and tools can run on it later
   useEffect(() => {
     if (!activeSessionId || activeSessionId === 'new' || !sessionChannelJson?.videos) return;
+    const key = CHANNEL_JSON_STORAGE_KEY + activeSessionId;
+    const raw = JSON.stringify(sessionChannelJson);
     try {
-      localStorage.setItem(CHANNEL_JSON_STORAGE_KEY + activeSessionId, JSON.stringify(sessionChannelJson));
-    } catch (_) {}
+      localStorage.setItem(key, raw);
+    } catch (e) {
+      if (e?.name === 'QuotaExceededError' || e?.code === 22) {
+        try {
+          const keys = Object.keys(localStorage).filter((k) => k.startsWith(CHANNEL_JSON_STORAGE_KEY) && k !== key);
+          for (const k of keys.slice(0, 3)) localStorage.removeItem(k);
+          localStorage.setItem(key, raw);
+        } catch (_) {
+          console.warn('Channel JSON too large for localStorage; not persisted.');
+        }
+      }
+    }
   }, [activeSessionId, sessionChannelJson]);
 
   useEffect(() => {
@@ -631,7 +643,7 @@ ${sessionSummary}${slimCsvBlock}
 
     try {
       if (useYouTubeTools && capturedChannelJson) {
-        const executeYt = (toolName, args) =>
+        const executeYt = async (toolName, args) =>
           executeYouTubeTool(toolName, args, capturedChannelJson, {
             anchorImageBase64: capturedImages.length ? capturedImages[0].data : null,
           });

@@ -11,20 +11,19 @@ const CODE_EXEC_TOOL = { codeExecution: {} };
 
 export const CODE_KEYWORDS = /\b(plot|chart|graph|analyz|statistic|regression|correlat|histogram|visualiz|calculat|compute|run code|write code|execute|pandas|numpy|matplotlib|csv|data)\b/i;
 
-let cachedPrompt = null;
+// Cache only the raw prompt file content (key: '_base_') so multi-user switching never reuses a user-specific prompt
+let cachedPromptBase = null;
 
 async function loadSystemPrompt(userName = '') {
-  let base = cachedPrompt;
-  if (base === null) {
+  if (cachedPromptBase === null) {
     try {
       const res = await fetch('/prompt_chat.txt');
-      base = res.ok ? (await res.text()).trim() : '';
-      cachedPrompt = base;
+      cachedPromptBase = res.ok ? (await res.text()).trim() : '';
     } catch {
-      base = '';
-      cachedPrompt = '';
+      cachedPromptBase = '';
     }
   }
+  const base = cachedPromptBase;
   if (userName && userName.trim()) {
     const name = userName.trim();
     return `${base}\n\nYou are talking to ${name}. In your first message in this conversation, you must greet them by name (e.g. "Hi ${name.split(' ')[0] || name}," or "Hello ${name},").`;
@@ -256,7 +255,7 @@ export const chatWithYouTubeTools = async (history, newMessage, channelJsonConte
     const { name, args } = funcCall.functionCall;
     let toolResult;
     try {
-      toolResult = executeFn(name, args);
+      toolResult = await Promise.resolve(executeFn(name, args));
     } catch (err) {
       toolResult = { error: err?.message || String(err) };
     }

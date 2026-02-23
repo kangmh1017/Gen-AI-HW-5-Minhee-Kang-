@@ -11,7 +11,7 @@ export function StatsError({ message }) {
 
 const formatNum = (n) => {
   if (n == null || typeof n !== 'number') return '—';
-  if (Number.isInteger(n)) return n.toLocaleString();
+  if (Number.isInteger(n) || (Number.isFinite(n) && n === Math.floor(n))) return Math.round(n).toLocaleString();
   return Number(n.toFixed(4)).toLocaleString();
 };
 

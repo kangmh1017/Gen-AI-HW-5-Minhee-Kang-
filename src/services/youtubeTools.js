@@ -144,9 +144,34 @@ const median = (sorted) => {
   return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
 };
 
+function makePlaceholderImage(prompt, errMsg = '') {
+  const w = 400;
+  const h = 300;
+  const canvas = typeof document !== 'undefined' && document.createElement('canvas');
+  if (canvas) {
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = '#1a1a2e';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#eee';
+      ctx.font = '16px sans-serif';
+      ctx.textAlign = 'center';
+      const lines = (prompt || '').slice(0, 80).match(/.{1,30}/g) || [(prompt || '').slice(0, 30)];
+      lines.forEach((line, i) => ctx.fillText(line, w / 2, h / 2 - 20 + i * 22));
+      ctx.fillText(errMsg || '(Image generation placeholder)', w / 2, h / 2 + 40);
+    }
+    const dataUrl = canvas.toDataURL('image/png');
+    const base64 = dataUrl.split(',')[1];
+    return { _imageType: 'generated', mimeType: 'image/png', data: base64, prompt: prompt || 'Generated image' };
+  }
+  return { _imageType: 'generated', prompt: prompt || 'Generated image', error: errMsg || 'Canvas not available' };
+}
+
 // ── Executor (runs in browser; channelData = { videos } from loaded JSON) ───
 
-export function executeYouTubeTool(toolName, args, channelData, options = {}) {
+export async function executeYouTubeTool(toolName, args, channelData, options = {}) {
   const videos = channelData?.videos || [];
   const anchorImageBase64 = options.anchorImageBase64 || null; // for generateImage
 
@@ -227,6 +252,7 @@ export function executeYouTubeTool(toolName, args, channelData, options = {}) {
       else {
         const titleMatch = videos.findIndex((v) => (v.title || '').toLowerCase().includes(sel));
         if (titleMatch >= 0) index = titleMatch;
+        else return { error: `No video found for "${args.selector}". Try "first", "most_viewed", or part of a video title.` };
       }
       const video = videos[index];
       if (!video) return { error: `No video found for "${args.selector}".` };
@@ -237,31 +263,28 @@ export function executeYouTubeTool(toolName, args, channelData, options = {}) {
     }
 
     case 'generateImage': {
-      // Placeholder: return a data URL for a simple "Generated" image so UI can display/download/lightbox.
-      // In production you would call an image generation API (e.g. Gemini image gen, Imagen, DALL-E).
       const prompt = args.text_prompt || 'Generated image';
-      const w = 400;
-      const h = 300;
-      const canvas = typeof document !== 'undefined' && document.createElement('canvas');
-      if (canvas) {
-        canvas.width = w;
-        canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = '#1a1a2e';
-          ctx.fillRect(0, 0, w, h);
-          ctx.fillStyle = '#eee';
-          ctx.font = '16px sans-serif';
-          ctx.textAlign = 'center';
-          const lines = prompt.slice(0, 80).match(/.{1,30}/g) || [prompt.slice(0, 30)];
-          lines.forEach((line, i) => ctx.fillText(line, w / 2, h / 2 - 20 + i * 22));
-          ctx.fillText('(Image generation placeholder)', w / 2, h / 2 + 40);
+      try {
+        const res = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt,
+            anchorImageBase64: anchorImageBase64 || undefined,
+          }),
+        });
+        const data = await res.json();
+        if (data.data && data.mimeType) {
+          return { _imageType: 'generated', mimeType: data.mimeType, data: data.data, prompt: data.prompt || prompt };
         }
-        const dataUrl = canvas.toDataURL('image/png');
-        const base64 = dataUrl.split(',')[1];
-        return { _imageType: 'generated', mimeType: 'image/png', data: base64, prompt };
+        if (data.error) {
+          // API returned no image (e.g. model not available) — fallback to placeholder
+          return makePlaceholderImage(prompt);
+        }
+        return makePlaceholderImage(prompt);
+      } catch (err) {
+        return makePlaceholderImage(prompt, err?.message || 'Request failed');
       }
-      return { _imageType: 'generated', prompt, error: 'Canvas not available' };
     }
 
     default:

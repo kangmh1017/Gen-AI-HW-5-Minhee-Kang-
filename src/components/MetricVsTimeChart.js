@@ -9,7 +9,7 @@ export default function MetricVsTimeChart({ data, metricField, onDownload }) {
   const chartData = (data || []).map((d, i) => ({
     ...d,
     index: i + 1,
-    name: d.label || d.date?.slice(0, 10) || `#${i + 1}`,
+    name: d.date?.slice(0, 10) || d.label || `#${i + 1}`,
   }));
 
   const handleDownloadCsv = (e) => {
