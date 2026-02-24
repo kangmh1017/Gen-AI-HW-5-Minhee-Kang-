@@ -61,7 +61,7 @@ async function main() {
   const videosData = await videosRes.json();
   const byId = (videosData.items || []).reduce((acc, v) => { acc[v.id] = v; return acc; }, {});
 
-  const videos = videoIds.map((id) => {
+  let videos = videoIds.map((id) => {
     const v = byId[id];
     if (!v) return null;
     const sn = v.snippet || {};
@@ -81,6 +81,31 @@ async function main() {
       transcript: null,
     };
   }).filter(Boolean);
+
+  // Fetch transcript per video (same as server API)
+  let YT;
+  try {
+    const mod = await import('youtube-transcript');
+    YT = mod.YoutubeTranscript;
+  } catch (_) {
+    YT = null;
+  }
+  if (YT && videos.length) {
+    const withTranscript = [];
+    for (let i = 0; i < videos.length; i++) {
+      const vid = videos[i];
+      let transcript = null;
+      try {
+        const chunks = await YT.fetchTranscript(vid.video_id);
+        if (Array.isArray(chunks) && chunks.length) {
+          transcript = chunks.map((c) => (c && c.text) || '').filter(Boolean).join('\n');
+        }
+      } catch (_) {}
+      withTranscript.push({ ...vid, transcript });
+      console.log(`Transcript ${i + 1}/${videos.length}: ${vid.video_id}`);
+    }
+    videos = withTranscript;
+  }
 
   const result = {
     channelId,
