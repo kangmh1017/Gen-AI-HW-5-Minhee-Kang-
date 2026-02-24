@@ -11,19 +11,19 @@ const CODE_EXEC_TOOL = { codeExecution: {} };
 
 export const CODE_KEYWORDS = /\b(plot|chart|graph|analyz|statistic|regression|correlat|histogram|visualiz|calculat|compute|run code|write code|execute|pandas|numpy|matplotlib|csv|data)\b/i;
 
-// Cache only the raw prompt file content (key: '_base_') so multi-user switching never reuses a user-specific prompt
-let cachedPromptBase = null;
+// Use Map so cache can be keyed by user/session; '_base_' = raw prompt file only (no user-specific text)
+const promptCache = new Map();
 
 async function loadSystemPrompt(userName = '') {
-  if (cachedPromptBase === null) {
+  if (!promptCache.has('_base_')) {
     try {
       const res = await fetch('/prompt_chat.txt');
-      cachedPromptBase = res.ok ? (await res.text()).trim() : '';
+      promptCache.set('_base_', res.ok ? (await res.text()).trim() : '');
     } catch {
-      cachedPromptBase = '';
+      promptCache.set('_base_', '');
     }
   }
-  const base = cachedPromptBase;
+  const base = promptCache.get('_base_') || '';
   if (userName && userName.trim()) {
     const name = userName.trim();
     return `${base}\n\nYou are talking to ${name}. In your first message in this conversation, you must greet them by name (e.g. "Hi ${name.split(' ')[0] || name}," or "Hello ${name},").`;

@@ -90,13 +90,8 @@ Purpose:
 Use this tool when the user asks to play or open a video
 from the loaded YouTube channel JSON.
 
-The user may specify:
-- A video by title (e.g., "play the asbestos video")
-- By order (e.g., "play the first video")
-- By metric (e.g., "play the most viewed video")
-
-Inputs:
-- video identifier (title, ordinal index, or metric condition)
+Inputs (use this exact parameter name):
+- selector (required, string): "first", "second", "third", ... "tenth", "most_viewed", or a substring of the video title (e.g. "asbestos" for "play the asbestos video").
 
 Output:
 - A clickable video card containing the video title and thumbnail
@@ -114,7 +109,7 @@ Inputs (use this exact parameter name):
 - field (required, string): one of "view_count", "like_count", "comment_count", or "duration". For duration the tool converts ISO 8601 to seconds before computing stats. Examples: "view_count", "like_count", "comment_count", "duration".
 
 Output:
-- mean, median, standard deviation, minimum, maximum (displayed in a table).
+- count, mean, median, standard deviation, minimum, maximum (displayed in a table).
 
 --- Behavior ---
 

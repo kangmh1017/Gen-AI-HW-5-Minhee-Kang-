@@ -237,9 +237,11 @@ export default function Chat({ user, onLogout }) {
           localStorage.setItem(key, raw);
           setStorageQuotaExceeded(false);
         } catch (_) {
-          console.warn('Channel JSON too large for localStorage; not persisted.');
+          console.warn('localStorage quota exceeded, channel JSON not cached:', e);
           setStorageQuotaExceeded(true);
         }
+      } else {
+        console.warn('localStorage save failed, channel JSON not cached:', e);
       }
     }
   }, [activeSessionId, sessionChannelJson]);
