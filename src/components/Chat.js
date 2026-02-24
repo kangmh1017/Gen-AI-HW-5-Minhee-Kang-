@@ -652,6 +652,7 @@ ${sessionSummary}${slimCsvBlock}
         const executeYt = async (toolName, args) =>
           executeYouTubeTool(toolName, args, capturedChannelJson, {
             anchorImageBase64: capturedImages.length ? capturedImages[0].data : null,
+            anchorMimeType: capturedImages.length ? capturedImages[0].mimeType : 'image/png',
           });
         const imagePartsForApi = capturedImages.map((img) => ({ mimeType: img.mimeType, data: img.data }));
         const { text: answer, charts: returnedCharts, toolCalls: returnedCalls, images: returnedImages, videoCards: returnedVideoCards } = await chatWithYouTubeTools(

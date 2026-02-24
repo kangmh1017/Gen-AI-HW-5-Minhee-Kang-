@@ -271,6 +271,7 @@ export async function executeYouTubeTool(toolName, args, channelData, options = 
           body: JSON.stringify({
             prompt,
             anchorImageBase64: anchorImageBase64 || undefined,
+            anchorMimeType: options.anchorMimeType || 'image/png',
           }),
         });
         const data = await res.json();

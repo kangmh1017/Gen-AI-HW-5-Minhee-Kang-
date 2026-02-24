@@ -470,12 +470,14 @@ app.post('/api/generate-image', async (req, res) => {
     return res.status(503).json({ error: 'Gemini API key not configured. Add REACT_APP_GEMINI_API_KEY to .env' });
   }
   try {
-    const { prompt: textPrompt, anchorImageBase64 } = req.body || {};
+    const { prompt: textPrompt, anchorImageBase64, anchorMimeType } = req.body || {};
     const prompt = (textPrompt || 'A simple image').trim();
     const parts = [{ text: prompt }];
     if (anchorImageBase64 && typeof anchorImageBase64 === 'string') {
+      const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+      const mime = anchorMimeType && allowed.includes(anchorMimeType) ? anchorMimeType : 'image/png';
       parts.unshift({
-        inlineData: { mimeType: 'image/png', data: anchorImageBase64 },
+        inlineData: { mimeType: mime, data: anchorImageBase64 },
       });
     }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
