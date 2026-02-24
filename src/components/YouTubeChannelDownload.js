@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { fetchYouTubeChannelDataStream } from '../services/mongoApi';
+import { fetchYouTubeChannelDataStream, fetchYouTubeChannelData } from '../services/mongoApi';
 import './YouTubeChannelDownload.css';
 
 const DEFAULT_URL = 'https://www.youtube.com/@veritasium';
@@ -23,9 +23,16 @@ export default function YouTubeChannelDownload() {
     const max = Math.min(MAX_VIDEOS_LIMIT, Math.max(1, parseInt(maxVideos, 10) || 10));
 
     try {
-      const data = await fetchYouTubeChannelDataStream(channelUrl.trim(), max, {
-        onProgress: (p) => setProgress(p),
-      });
+      let data;
+      try {
+        data = await fetchYouTubeChannelDataStream(channelUrl.trim(), max, {
+          onProgress: (p) => setProgress(p),
+        });
+      } catch (streamErr) {
+        // channel-stream 404 or server not running → fallback to non-streaming API
+        setProgress(50);
+        data = await fetchYouTubeChannelData(channelUrl.trim(), max);
+      }
       setProgress(100);
       setResult(data);
     } catch (err) {
