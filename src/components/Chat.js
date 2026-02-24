@@ -140,6 +140,7 @@ export default function Chat({ user, onLogout }) {
   const [sessionSlimCsv, setSessionSlimCsv] = useState(null);   // key-columns CSV string sent directly to Gemini
   const [jsonContext, setJsonContext] = useState(null);         // pending JSON attachment chip
   const [sessionChannelJson, setSessionChannelJson] = useState(null); // parsed channel JSON for YouTube tools
+  const [storageQuotaExceeded, setStorageQuotaExceeded] = useState(false); // localStorage 5MB limit
   const [streaming, setStreaming] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -227,14 +228,17 @@ export default function Chat({ user, onLogout }) {
     const raw = JSON.stringify(sessionChannelJson);
     try {
       localStorage.setItem(key, raw);
+      setStorageQuotaExceeded(false);
     } catch (e) {
       if (e?.name === 'QuotaExceededError' || e?.code === 22) {
         try {
           const keys = Object.keys(localStorage).filter((k) => k.startsWith(CHANNEL_JSON_STORAGE_KEY) && k !== key);
           for (const k of keys.slice(0, 3)) localStorage.removeItem(k);
           localStorage.setItem(key, raw);
+          setStorageQuotaExceeded(false);
         } catch (_) {
           console.warn('Channel JSON too large for localStorage; not persisted.');
+          setStorageQuotaExceeded(true);
         }
       }
     }
@@ -1045,12 +1049,17 @@ ${sessionSummary}${slimCsvBlock}
           )}
           {/* JSON chip (channel data) — show when just dropped (jsonContext) or already in session (sessionChannelJson) */}
           {(jsonContext || sessionChannelJson?.videos?.length) && (
-            <div className="csv-chip">
-              <span className="csv-chip-icon">📋</span>
-              <span className="csv-chip-name">{jsonContext?.name || 'Channel JSON'}</span>
-              <span className="csv-chip-meta">{sessionChannelJson?.videos?.length ?? jsonContext?.videoCount ?? 0} videos · plot, play, stats</span>
-              <button className="csv-chip-remove" onClick={() => { setJsonContext(null); setSessionChannelJson(null); }} aria-label="Remove JSON">×</button>
-            </div>
+            <>
+              <div className="csv-chip">
+                <span className="csv-chip-icon">📋</span>
+                <span className="csv-chip-name">{jsonContext?.name || 'Channel JSON'}</span>
+                <span className="csv-chip-meta">{sessionChannelJson?.videos?.length ?? jsonContext?.videoCount ?? 0} videos · plot, play, stats</span>
+                <button className="csv-chip-remove" onClick={() => { setJsonContext(null); setSessionChannelJson(null); setStorageQuotaExceeded(false); }} aria-label="Remove JSON">×</button>
+              </div>
+              {storageQuotaExceeded && (
+                <p className="chat-storage-warning">Channel data could not be saved to this device (storage limit ~5MB). It will still work in this session.</p>
+              )}
+            </>
           )}
 
           {/* Image previews */}

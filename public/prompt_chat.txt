@@ -61,15 +61,13 @@ Purpose:
 Use this tool when the user asks to create or generate an image from a text prompt.
 This tool can optionally use an anchor image provided by the user.
 
-Inputs:
-- prompt (string): description of the desired image
-- anchor_image (optional image file)
+Inputs (use these exact parameter names):
+- text_prompt (required, string): description of the desired image (e.g. "Veritasium-style thumbnail, title: Why Does This Work?").
+- use_anchor_image (optional, boolean): set to true if the user attached an image and asked for style-based generation (e.g. "이 이미지 스타일로"); false for text-only.
 
 Output:
-- A generated image displayed in the chat
-The image should be downloadable and clickable to enlarge.
+- A generated image displayed in the chat (downloadable, clickable to enlarge).
 
-Tool: plot_metric_vs_time
 Tool: plot_metric_vs_time
 
 Purpose:
@@ -77,15 +75,14 @@ Use this tool when the user asks to visualize how a numeric metric
 (e.g., view_count, like_count, comment_count, duration)
 changes over time for videos in the loaded YouTube channel JSON.
 
-Inputs:
-- metric (string): name of numeric field in the JSON
+Inputs (use this exact parameter name):
+- metric_field (required, string): one of "view_count", "like_count", "comment_count", or "duration".
 
 Time Definition:
-The x-axis represents the publish_date of each video.
+The x-axis represents the publish_date (published_at) of each video.
 
 Output:
-- An interactive React chart embedded in the chat
-The chart should enlarge when clicked and have a download button.
+- An interactive React chart embedded in the chat (enlarge when clicked, download button).
 
 Tool: play_video
 
@@ -113,16 +110,11 @@ Use this tool when the user asks for statistics,
 averages, distributions, or summaries of a numeric field
 in the loaded YouTube channel JSON.
 
-Inputs:
-- field (string): name of numeric field
-  (e.g., view_count, like_count, comment_count, duration)
+Inputs (use this exact parameter name):
+- field (required, string): one of "view_count", "like_count", "comment_count", or "duration". For duration the tool converts ISO 8601 to seconds before computing stats. Examples: "view_count", "like_count", "comment_count", "duration".
 
 Output:
-- mean
-- median
-- standard deviation
-- minimum
-- maximum
+- mean, median, standard deviation, minimum, maximum (displayed in a table).
 
 --- Behavior ---
 

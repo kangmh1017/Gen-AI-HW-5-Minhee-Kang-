@@ -813,6 +813,12 @@
   color: #6ee7b7;
 }
 
+.chat-storage-warning {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
 /* CSV badge on sent user messages */
 
 .msg-csv-badge {
