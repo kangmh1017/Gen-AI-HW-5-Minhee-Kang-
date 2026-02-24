@@ -78,6 +78,7 @@ export default function MetricVsTimeChart({ data, metricField, onDownload }) {
           <Line type="monotone" dataKey="value" stroke="#ffd700" strokeWidth={2} dot={{ fill: '#ffd700', r: 3 }} />
         </LineChart>
       </ResponsiveContainer>
+      <p className="metric-vs-time-axis-caption">X-axis: Video publish date</p>
       {enlarged && (
         <button type="button" className="metric-vs-time-close-btn" onClick={() => setEnlarged(false)}>
           Close
